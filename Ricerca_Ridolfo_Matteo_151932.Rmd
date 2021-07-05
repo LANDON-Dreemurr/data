@@ -1,0 +1,234 @@
+---
+title: "Netflix, anlisi sull'animazione e sui concorrenti"
+output:
+  ioslides_presentation: default
+  slidy_presentation: default
+  beamer_presentation: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = FALSE, message = FALSE, warning = FALSE, echo = FALSE)
+```
+
+```{r}
+
+#libraries
+
+library(stringr)
+
+library(readr)
+
+library(igraph)
+
+library(dplyr)
+
+library(tidyr)
+
+library(tibble)
+as_tibble(iris)
+
+library(ggplot2)
+
+#functions
+is_animated = function(listed_in){
+  case_when(
+  (grepl("Kids' TV", listed_in, fixed = TRUE) | grepl("Anime Series", listed_in, fixed = TRUE)) ~ "Animated",
+  TRUE ~ "Not animated"
+  )
+}
+
+is_anime = function(listed_in){
+  case_when(
+  grepl("Kids' TV", listed_in, fixed = TRUE) ~ "Cartoon",
+  grepl("Anime Series", listed_in, fixed = TRUE) ~ "Anime",
+  TRUE ~ "Live-action"
+  )
+}
+
+new_age = function(Age){
+  case_when(
+  grepl("+", Age) ~ str_replace(Age, "\\+", "") ,
+  Age == "all" ~ "0" ,
+  TRUE ~ "N/A"
+  )
+}
+
+place = function(country){
+  case_when(
+  country == "Japan" ~ "Japan",
+  grepl("Japan", country) ~ "Not Japan",
+  TRUE ~ "N/A"
+  )
+}
+
+place_ = function(country){
+  case_when(
+  country == "Japan" ~ "Japan",
+  grepl("United States", country) ~ "America",
+  TRUE ~ "Other"
+  )
+}
+
+exc = function(Netflix, Disney, Hulu, Prime){
+  case_when(
+    ((Netflix == 1)&(Disney == 0)&(Hulu == 0)&(Prime==0)) ~ "Netflix",
+    ((Netflix == 0)&(Disney == 1)&(Hulu == 0)&(Prime==0)) ~ "Disney",
+    ((Netflix == 0)&(Disney == 0)&(Hulu == 1)&(Prime==0)) ~ "Hulu",
+    ((Netflix == 0)&(Disney == 0)&(Hulu == 0)&(Prime==1)) ~ "Prime",
+    TRUE ~ "Shared",
+    
+  )
+  
+}
+
+#datasets
+
+netflix = read_csv("https://raw.githubusercontent.com/LANDON-Dreemurr/data/main/netflix_titles.csv")
+
+on_what = read_csv("https://raw.githubusercontent.com/LANDON-Dreemurr/data/main/MoviesOnStreamingPlatforms_updated_.csv")
+
+netflix_animated = netflix %>% mutate(animated = is_anime(listed_in))
+
+on_what_ratings = on_what %>% select("Title", "Age", "IMDb")
+```
+
+## Quanti prodotti animati ha Netflix
+```{r}
+netflix %>% mutate(animated = is_animated(listed_in)) %>% ggplot(aes(x=animated)) + geom_bar()
+```
+```{r}
+netflix_animated %>% filter(animated == "Anime" | animated == "Cartoon") %>% ggplot(aes(x=animated)) + geom_bar()
+```
+
+## Anime o cartoni americani?
+```{r}
+netflix_animated %>% ggplot(aes(x=animated)) + geom_bar()
+```
+
+## Differenza di età consiglita
+```{r}
+netflix_animated %>% filter(animated=="Anime") %>% ggplot(aes(x=rating)) + geom_bar()
+
+netflix_animated %>% filter(animated=="Cartoon") %>% ggplot(aes(x=rating)) + geom_bar()
+
+netflix_animated %>% filter(animated=="Live-action") %>% ggplot(aes(x=rating)) + geom_bar()
+
+
+inner_join(netflix, on_what_ratings, by = c("title" = "Title")) %>% mutate(animated = is_anime(listed_in), Age = new_age(Age)) %>% filter(Age != "N/A") %>% filter(animated=="Live-action") %>% ggplot(aes(x=Age)) + geom_bar()
+```
+## Riassumendo
+```{r}
+netflix_animated %>% ggplot() + geom_bar(aes(x=animated, fill=rating), position = "dodge")
+```
+## Date di uscita e di rilascio su netflix
+```{r}
+netflix %>% separate("date_added", into = c("date_added", "year_added"),sep = ",", convert = TRUE) %>% pivot_longer(
+    cols = c("year_added", "release_year"),
+    names_to = "year_type",
+    values_to = "year",
+    names_repair = "minimal"
+  ) %>% ggplot() + geom_freqpoly(mapping = aes(x = year, colour = year_type))
+
+```
+## Date di uscita e di rilascio: anime, cartoni occidentali e live-action
+```{r}
+netflix_animated %>% filter(animated == "Anime") %>% separate("date_added", into = c("date_added", "year_added"),sep = ",", convert = TRUE) %>% pivot_longer(
+    cols = c("year_added", "release_year"),
+    names_to = "year_type",
+    values_to = "year",
+    names_repair = "minimal"
+  ) %>% ggplot() + geom_freqpoly(mapping = aes(x = year, colour = year_type))
+
+netflix_animated %>% filter(animated == "Cartoon") %>% separate("date_added", into = c("date_added", "year_added"),sep = ",", convert = TRUE) %>% pivot_longer(
+    cols = c("year_added", "release_year"),
+    names_to = "year_type",
+    values_to = "year",
+    names_repair = "minimal"
+  ) %>% ggplot() + geom_freqpoly(mapping = aes(x = year, colour = year_type))
+
+netflix_animated %>% filter(animated == "Live-action") %>% separate("date_added", into = c("date_added", "year_added"),sep = ",", convert = TRUE) %>% pivot_longer(
+    cols = c("year_added", "release_year"),
+    names_to = "year_type",
+    values_to = "year",
+    names_repair = "minimal"
+  ) %>% ggplot() + geom_freqpoly(mapping = aes(x = year, colour = year_type))
+```
+
+## Gli studi di animazione
+```{r}
+
+
+netflix %>% filter(grepl("Anime Series", listed_in, fixed = TRUE) == TRUE)  %>% mutate(production = place(country) )%>% ggplot(aes(x=production)) + geom_bar()
+```
+```{r}
+
+
+netflix %>% filter(grepl("Anime Series", listed_in, fixed = TRUE) == TRUE)  %>% mutate(production = place_(country) ) %>% ggplot(aes(x=production)) + geom_bar()
+```
+## Serie tv contro film
+```{r}
+netflix %>% ggplot(aes(x=type)) + geom_bar()
+
+netflix %>% mutate(animated = is_anime(listed_in)) %>% ggplot() + geom_bar(aes(x=animated, fill=type), position = "dodge")
+```
+## Serie tv
+```{r}
+netflix %>% filter(type=="TV Show") %>% mutate(animated = is_anime(listed_in)) %>% ggplot() + geom_bar(aes(x=animated), position = "dodge")
+```
+
+```{r}
+netflix %>% filter(type=="TV Show") %>% mutate(animated = is_anime(listed_in)) %>% ggplot() + geom_bar(aes(x=rating))
+```
+```{r}
+netflix %>% filter(type=="TV Show") %>% mutate(animated = is_anime(listed_in)) %>% ggplot() + geom_bar(aes(x=animated, fill=rating), position = "dodge")
+```
+## Quanto può durare una serie?
+```{r}
+netflix %>% filter(type=="TV Show") %>% mutate(animated = is_anime(listed_in)) %>% ggplot() + geom_bar(aes(x=duration))+
+  theme(axis.text.x = element_text(angle=90, vjust = 0.5))
+```
+```{r}
+netflix %>% filter(type=="TV Show") %>% mutate(animated = is_anime(listed_in)) %>% ggplot() + geom_bar(aes(x=animated, fill=duration), position = "dodge")
+```
+## Durata dei film
+```{r}
+netflix %>% filter(type=="Movie") %>%  mutate(duration = str_replace(duration, "min", "")) %>% ggplot() + geom_freqpoly(aes(x=as.numeric(duration)))
+```
+## Analisi delle piattaforme concorrenti
+```{r}
+on_what %>% pivot_longer(
+    cols = c("Netflix", "Hulu", "Prime", "Disney"),
+    names_to = "Platform",
+    values_to = "is_on",
+    names_repair = "minimal"
+  ) %>% ggplot() + geom_bar(aes(x=is_on, fill = Platform))
+
+on_what %>% filter(grepl("Animation", Genres)) %>% pivot_longer(
+    cols = c("Netflix", "Hulu", "Prime", "Disney"),
+    names_to = "Platform",
+    values_to = "is_on",
+    names_repair = "minimal"
+  ) %>% ggplot() + geom_bar(aes(x=is_on, fill = Platform))
+```
+## Esclusive
+```{r}
+
+on_what %>% mutate(Exclusive = exc(Netflix, Disney, Hulu, Prime)) %>% ggplot(aes(x=Exclusive)) + geom_bar()
+
+on_what %>% filter(grepl("Animation", Genres)) %>% mutate(Exclusive = exc(Netflix, Disney, Hulu, Prime)) %>% ggplot(aes(x=Exclusive)) + geom_bar()
+
+```
+## Età consigliata e valutazioni
+```{r}
+on_what %>% filter(grepl("Animation", Genres)) %>% mutate(Exclusive = exc(Netflix, Disney, Hulu, Prime)) %>% ggplot() + geom_bar(aes(x=Exclusive, fill = Age), position = "dodge")
+
+on_what %>% filter(!grepl("Animation", Genres)) %>% mutate(Exclusive = exc(Netflix, Disney, Hulu, Prime)) %>% ggplot() + geom_histogram(aes(x=IMDb, fill = Exclusive), position = "dodge")
+
+on_what %>% filter(grepl("Animation", Genres)) %>% mutate(Exclusive = exc(Netflix, Disney, Hulu, Prime)) %>% ggplot() + geom_histogram(aes(x=IMDb, fill = Exclusive), position = "dodge")
+```
+
+
+
+
+
+

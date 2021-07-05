@@ -1,0 +1,83 @@
+---
+title: "Netflix, anlisi sull'animazione e sui concorrenti"
+author: "Ridolfo Matteo"
+output:
+  ioslides_presentation: 
+    css: scrollable_slides.css
+runtime: shiny
+---
+
+## Quanti prodotti animati ha Netflix
+
+![](Grafici/Slide 1/000006.png)
+
+## Anime o cartoni americani?
+
+![](Grafici/Slide 1/000007.png)
+![](Grafici/Slide 1/000008.png)
+
+## Differenza di età consiglita
+
+![](Grafici/Slide 2/000013.png)
+![](Grafici/Slide 2/000015.png)
+![](Grafici/Slide 2/000017.png)
+![](Grafici/Slide 2/000019.png)
+
+
+
+## Riassumendo
+
+![](Grafici/Slide 3/000007.png)
+
+## Date di uscita e di rilascio su netflix
+
+![](Grafici/Slide 4/000007.png)
+
+## Date di uscita e di rilascio: anime, cartoni occidentali e live-action
+
+![](Grafici/Slide 5/000011.png)
+![](Grafici/Slide 5/00000f.png)
+![](Grafici/Slide 5/000013.png)
+
+## Gli studi di animazione
+
+![](Grafici/Slide 6/000009.png)
+![](Grafici/Slide 6/0000099.png)
+
+## Serie tv contro film
+
+![](Grafici/Slide 7/000002.png)
+![](Grafici/Slide 7/000009.png)
+
+## Serie tv
+
+![](Grafici/Slide 8/00000b.png)
+![](Grafici/Slide 8/000007.png)
+![](Grafici/Slide 8/000005.png)
+
+## Quanto può durare una serie?
+![](Grafici/Slide 9/000007.png)
+![](Grafici/Slide 9/0000071.png)
+
+## Durata dei film
+![](Grafici/Slide 10/000005.png)
+
+## Analisi delle piattaforme concorrenti
+
+![](Grafici/Slide 11/00000b.png)
+![](Grafici/Slide 11/00000d.png)
+
+## Esclusive
+
+![](Grafici/Slide 12/00000b.png)
+![](Grafici/Slide 12/00000d.png)
+
+## Età consigliata e valutazioni
+
+![](Grafici/Slide 13/00000a.png)
+![](Grafici/Slide 13/00000c.png)
+![](Grafici/Slide 13/00000e.png)
+
+
+
+
